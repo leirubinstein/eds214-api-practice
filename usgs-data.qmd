@@ -1,0 +1,86 @@
+---
+title: "USGS Data"
+author: "Leilanie Rubinstein"
+format: html
+editor: visual
+execute:
+  warning: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(dataRetrieval)
+```
+
+```{r}
+# Set parameters for this query
+
+# Ventura river during Hilary tropical storm
+siteNumber <- "11118500"
+parameterCd <- "00060" # Discharge
+startDate <- "2023-08-19"
+endDate <- "2023-08-22"
+
+```
+
+```{r}
+# Query the APIs
+discharge <- readNWISdv(siteNumber, parameterCd, startDate, endDate)
+
+# dv for daily value function
+```
+
+```{r}
+ggplot(data = discharge, aes(x = Date, y = X_00060_00003)) + 
+  geom_point() +
+  geom_line()
+  labs(x = "Date",
+       y = "Discharge (ft^3/s)")
+
+max_discharge_table <- discharge %>%
+  dplyr::group_by(site_no) %>%
+  dplyr::summarise(max = max(X_00060_00003))
+```
+
+```{r}
+# request for mean and maximum daily temperature and discharge in early 2012
+siteNumber <- "01491000"
+parameterCd <- c("00010", "00060") # Temperature and discharge
+statCd <- c("00001", "00003") # Mean and maximum
+startDate <- "2012-01-01"
+endDate <- "2012-05-01"
+
+temperatureAndFlow <- readNWISdv(siteNumber, parameterCd,
+  startDate, endDate,
+  statCd = statCd
+)
+```
+
+```{r}
+siteNumber <- "11118500"
+parameterCd <- "00060" # Discharge
+startDate <- ""
+endDate <- "2023-01-09"
+
+discharge_start <- readNWISdv(siteNumber, parameterCd, startDate, endDate)
+
+max_discharge_20230109 <- discharge_start %>%
+  dplyr::filter(Date == "2023-01-09")
+```
+
+```{r}
+siteNumber <- "11118500"
+parameterCd <- "00060" # Discharge
+startDate <- "2023-08-19"
+endDate <- "2023-08-22"
+
+discharge_uv <- readNWISuv(siteNumber, parameterCd, startDate, endDate)
+
+ggplot(data = discharge_uv, aes(x = dateTime, y = X_00060_00000)) + 
+  geom_point() +
+  labs(x = "Date",
+       y = "Discharge (ft^3/s)")
+```
+
